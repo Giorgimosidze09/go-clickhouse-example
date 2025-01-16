@@ -36,6 +36,34 @@ info:
   version: "1.0"
 paths:
   /items:
+    get:
+      description: Retrieve all items from the database
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of items
+          schema:
+            items:
+              $ref: '#/definitions/models.ItemResponse'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get all items
+      tags:
+      - items
     post:
       consumes:
       - application/json
@@ -194,6 +222,63 @@ paths:
       summary: Update an existing item
       tags:
       - items
+  /items/search:
+    get:
+      consumes:
+      - application/json
+      description: Searches, filters, sorts, and paginates items based on query parameters
+      parameters:
+      - description: Search query
+        in: query
+        name: search
+        type: string
+      - description: Minimum price
+        in: query
+        name: min_price
+        type: number
+      - description: Maximum price
+        in: query
+        name: max_price
+        type: number
+      - description: Sort by field (e.g., price, name)
+        in: query
+        name: sort_by
+        type: string
+      - description: Sort order (ASC or DESC)
+        in: query
+        name: sort_order
+        type: string
+      - description: Page number (default is 1)
+        in: query
+        name: page
+        type: integer
+      - description: Items per page (default is 10)
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of items with pagination metadata
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Search, filter, and sort items with pagination
+      tags:
+      - Items
   /login:
     post:
       consumes:

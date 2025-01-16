@@ -13,6 +13,10 @@ type DBService struct {
 	conn *sql.DB
 }
 
+func (db *DBService) Query(query string, args ...interface{}) (*sql.Rows, error) {
+	return db.conn.Query(query, args...)
+}
+
 func NewDBService(clickhouseURL string) *DBService {
 	conn, err := sql.Open("clickhouse", clickhouseURL)
 	if err != nil {
@@ -147,4 +151,32 @@ func (db *DBService) GetUserByUsername(username string) (models.UserResponse, er
 		return models.UserResponse{}, err
 	}
 	return user, nil
+}
+
+func (db *DBService) GetAllItems() ([]models.ItemResponse, error) {
+	// Query to get all items
+	query := `SELECT id, name, price FROM items`
+	rows, err := db.conn.Query(query)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch items: %w", err)
+	}
+	defer rows.Close()
+
+	var items []models.ItemResponse
+	// Iterate through the rows and append each item to the items slice
+	for rows.Next() {
+		var item models.ItemResponse
+		err := rows.Scan(&item.ID, &item.Name, &item.Price)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan item: %w", err)
+		}
+		items = append(items, item)
+	}
+
+	// Check for errors from iterating over rows
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error occurred while fetching items: %w", err)
+	}
+
+	return items, nil
 }

@@ -32,6 +32,8 @@ func SetupRouter() *gin.Engine {
 	// Protected routes (Require authentication and authorization)
 	// Apply AuthMiddleware to secure the routes and RBACMiddleware for role-based access control
 	router.POST("/items", middleware.AuthMiddleware(), middleware.RBACMiddleware("admin"), itemHandler.CreateItem)
+	router.GET("/items", middleware.AuthMiddleware(), itemHandler.GetItems)
+
 	router.GET("/items/:id", middleware.AuthMiddleware(), itemHandler.GetItem)
 	router.PUT("/items/:id", middleware.AuthMiddleware(), middleware.RBACMiddleware("admin"), itemHandler.UpdateItem)
 	router.DELETE("/items/:id", middleware.AuthMiddleware(), middleware.RBACMiddleware("admin"), itemHandler.DeleteItem)
